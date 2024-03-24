@@ -1,4 +1,4 @@
-import { nanoid } from "nanoid";
+import { nanoid } from "nanoid/non-secure";
 
 export function createScratchpad(pad) {
   const id = nanoid();
