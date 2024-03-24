@@ -1,0 +1,20 @@
+{
+  "name": "scratchpad",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "start": "webpack --mode development ./src/index.js --output-path ./bin --watch"
+  },
+  "keywords": [],
+  "author": "Siddharth Shyniben <siddharth.muscat@gmail.com> (https://siddu.tech/)",
+  "license": "ISC",
+  "dependencies": {
+    "mithril": "^2.2.2"
+  },
+  "devDependencies": {
+    "@types/mithril": "^2.2.6",
+    "webpack": "^5.91.0",
+    "webpack-cli": "^5.1.4"
+  }
+}
