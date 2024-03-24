@@ -1,4 +1,5 @@
 import { nanoid } from "nanoid/non-secure";
+import { assert, isValidDate, type } from "./util";
 
 export function createScratchpad(pad) {
   const id = nanoid();
@@ -43,30 +44,41 @@ function _putScratchpad(x) {
 }
 
 function _getScratchpads() {
-  const items = _read();
-  if (items === "") items = "[]";
+  const items = _read() || "[]";
 
   let parsed;
 
-  try {
-    parsed = JSON.parse(items);
-    _validateData(parsed);
-  } catch {
-    // TODO: recovery
-    throw new ReferenceError("0x0");
-  }
+  // TODO: recovery
+
+  // try {
+  parsed = JSON.parse(items);
+  _validateData(parsed);
+  // } catch {
+  //   throw new ReferenceError("0x0");
+  // }
 
   return parsed;
 }
 
 function _validateData(parsed) {
-  assert(Array.isArray(parsed));
+  assert(Array.isArray(parsed), "`scratch` is not array");
   for (const item of parsed) {
-    assert(type(item) == "object");
-    assert(type(item.id) == "string");
-    assert(type(item.date) == "number");
-    assert(isValidDate(item.date));
-    assert(Array.isArray(item.pad));
-    for (const item of item.pad) assert(type(item === "string"));
+    assert(type(item) == "object", "`item` is not object");
+    assert(type(item.id) == "string", "`id` is not string");
+    assert(type(item.date) == "number", "`date` is not number");
+    assert(
+      item.title === null || type(item.title) == "string",
+      "`title` is not string",
+    );
+    assert(isValidDate(item.date), "`date` is not valid: " + item.date);
+    assert(Array.isArray(item.pad), "`pad` is not array");
+    for (const k of item.pad) {
+      assert(type(k) == "object", "`k` is not object");
+      assert(
+        k.type == "code" || k.type == "text",
+        "`k.type` is not recognized",
+      );
+      assert(type(k.text) == "string", "`k.text` is not string");
+    }
   }
 }

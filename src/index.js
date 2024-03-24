@@ -1,5 +1,8 @@
 import m from "mithril";
-import Hello from './hello.js';
-import Splash from './splash.js';
+import Home from "./home";
 
 const root = document.body;
+
+m.route(root, "/", {
+  "/": Home,
+});

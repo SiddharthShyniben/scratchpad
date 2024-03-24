@@ -1,0 +1,87 @@
+html,
+body {
+  margin: 0;
+  font-family: "Space Mono", monospace;
+  background-color: #121212;
+  color: white;
+}
+
+.splash {
+  width: 100vw;
+  height: 100vh;
+}
+
+.splash span {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 3rem;
+  white-space: pre;
+  letter-spacing: -3px;
+}
+
+.main {
+  width: 70%;
+  margin: 3rem auto;
+}
+
+hr {
+  margin-bottom: 4rem;
+  border: 1px solid #ef626c;
+}
+
+.pad-item {
+  margin-bottom: 2rem;
+}
+
+pre {
+  background: black;
+  padding: 1rem;
+}
+
+pre code {
+  display: block;
+  white-space: pre;
+  -webkit-overflow-scrolling: touch;
+  overflow-x: scroll;
+  max-width: 100%;
+  min-width: 100px;
+  padding: 0;
+}
+
+.untitled {
+  color: grey;
+}
+
+.pad-item {
+  margin-bottom: 5rem;
+}
+
+/* .empty-screen { */
+/*   position: absolute; */
+/*   top: 50%; */
+/*   left: 50%; */
+/*   transform: translate(-50%, -50%); */
+/**/
+/*   display: flex; */
+/*   justify-content: center; */
+/*   align-items: center; */
+/*   flex-direction: column; */
+/* } */
+
+.empty-screen > * {
+  z-index: 2;
+}
+
+.dud {
+  color: grey;
+}
+
+.empty-screen {
+  height: calc(80vh - 5rem);
+  padding: 0;
+  line-height: 18px;
+  overflow: hidden;
+  overflow-wrap: anywhere;
+}
