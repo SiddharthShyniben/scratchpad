@@ -10,7 +10,8 @@
   "author": "Siddharth Shyniben <siddharth.muscat@gmail.com> (https://siddu.tech/)",
   "license": "ISC",
   "dependencies": {
-    "mithril": "^2.2.2"
+    "mithril": "^2.2.2",
+    "nanoid": "^5.0.6"
   },
   "devDependencies": {
     "@types/mithril": "^2.2.6",
