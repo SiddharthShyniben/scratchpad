@@ -1,11 +1,14 @@
 import { nanoid } from "nanoid/non-secure";
 import { assert, isValidDate, type } from "./util";
 
-export function createScratchpad(pad) {
+export function createScratchpad({ title, pad }) {
   const id = nanoid();
-  const date = new Date();
+  const date = Date.now();
 
-  _putScratchpad({ id, date, pad });
+  const scratchpad = { id, title, date, pad };
+
+  _putScratchpad(scratchpad);
+  return scratchpad;
 }
 
 export function getScratchpads() {
@@ -16,12 +19,13 @@ export function getScratchpad(id) {
   return _getScratchpads().find((x) => x.id == id);
 }
 
-export function updateScratchPad(id, pad) {
+export function updateScratchPad(scratchpad) {
   const pads = _getScratchpads();
-  const index = pads.findIndex((x) => x.id == id);
+  const index = pads.findIndex((x) => x.id == scratchpad.id);
   if (index < 0) throw new ReferenceError("0x1");
-  pads[index].pad = pad;
+  pads[index] = Object.assign(pads[index], scratchpad);
   _write(JSON.stringify(pads));
+  return pads[index];
 }
 
 export function deleteScratchPad(id) {
@@ -35,12 +39,12 @@ export function deleteScratchPad(id) {
 
 const STORAGE_TAG = "scratch";
 const _read = () => localStorage.getItem(STORAGE_TAG);
-const _write = () => localStorage.setItem(STORAGE_TAG, x);
+const _write = (x) => localStorage.setItem(STORAGE_TAG, x);
 
 function _putScratchpad(x) {
   const scratchPads = _getScratchpads();
   scratchPads.push(x);
-  _write(JSON.stringify(parsed));
+  _write(JSON.stringify(scratchPads));
 }
 
 function _getScratchpads() {
@@ -63,11 +67,12 @@ function _getScratchpads() {
 function _validateData(parsed) {
   assert(Array.isArray(parsed), "`scratch` is not array");
   for (const item of parsed) {
+    console.log({ item });
     assert(type(item) == "object", "`item` is not object");
     assert(type(item.id) == "string", "`id` is not string");
     assert(type(item.date) == "number", "`date` is not number");
     assert(
-      item.title === null || type(item.title) == "string",
+      item.title == null || type(item.title) == "string",
       "`title` is not string",
     );
     assert(isValidDate(item.date), "`date` is not valid: " + item.date);

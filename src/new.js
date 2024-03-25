@@ -3,12 +3,16 @@ import { basicSetup, EditorView } from "codemirror";
 import { keymap } from "@codemirror/view";
 import { javascript } from "@codemirror/lang-javascript";
 import { birdsOfParadise } from "thememirror";
-
 import { once, selectAll } from "./util";
+import { createScratchpad, updateScratchPad } from "./scratchpad";
 
 export default function New() {
   let untitled = "untitled";
-  let content = "untitled scratchpad";
+
+  let scratchpad = {
+    title: null,
+    pad: [{ type: "code", text: "\n\n\n" }],
+  };
 
   let editor;
 
@@ -25,8 +29,9 @@ export default function New() {
             {
               key: "Ctrl-Enter", // TODO Shift?
               run() {
-                const code = editor.state.doc.toString();
-                eval(code);
+                scratchpad.pad[0].text = editor.state.doc.toString();
+                if (!scratchpad.id) scratchpad = createScratchpad(scratchpad);
+                else scratchpad = updateScratchPad(scratchpad);
                 return true;
               },
             },
@@ -49,17 +54,20 @@ export default function New() {
           "h2",
           {
             class: untitled,
+
             contenteditable: true,
             oninput(e) {
               dehl();
-              content = this.innerText;
+              scratchpad.title = this.innerText.trim();
               e.redraw = false;
+              if (!scratchpad.id) scratchpad = createScratchpad(scratchpad);
+              else scratchpad = updateScratchPad(scratchpad);
             },
             onfocus: (e) => {
               selectAll(e.target);
             },
           },
-          m.trust(content),
+          m.trust(scratchpad.title || "untitled scratchpad"),
         ),
         m("div", { class: "monaco" }),
       ]);
