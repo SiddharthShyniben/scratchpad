@@ -70,6 +70,9 @@ export default function New() {
               e.redraw = false;
               savePad();
             },
+            onkeypress(e) {
+              if (e.which == 13) e.preventDefault();
+            },
             onfocus: (e) => {
               selectAll(e.target);
             },
