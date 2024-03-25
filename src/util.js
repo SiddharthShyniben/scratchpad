@@ -87,3 +87,29 @@ export const colors = [
   "#6c79a5",
   "#5b6893",
 ];
+
+export const once = (func) => {
+  return function () {
+    if (func) {
+      func.apply(this, arguments);
+      func = null;
+    }
+  };
+};
+
+export function selectAll(el) {
+  window.setTimeout(function () {
+    let sel, range;
+    if (window.getSelection && document.createRange) {
+      range = document.createRange();
+      range.selectNodeContents(el);
+      sel = window.getSelection();
+      sel.removeAllRanges();
+      sel.addRange(range);
+    } else if (document.body.createTextRange) {
+      range = document.body.createTextRange();
+      range.moveToElementText(el);
+      range.select();
+    }
+  }, 1);
+}
