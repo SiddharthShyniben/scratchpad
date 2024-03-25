@@ -15,6 +15,7 @@ export default function New() {
   };
 
   let editor;
+  let first = true;
 
   const dehl = once(() => ((untitled = undefined), m.redraw()));
   const savePad = () => {
@@ -40,8 +41,10 @@ export default function New() {
           ]),
           EditorView.updateListener.of((v) => {
             if (v.docChanged) {
+              if (first) return;
               scratchpad.pad[0].text = editor.state.doc.toString();
               savePad();
+              first = false;
             }
           }),
         ],
@@ -57,30 +60,39 @@ export default function New() {
     },
 
     view() {
-      return m("main", { class: "main" }, [
-        m(
-          "h2",
-          {
-            class: untitled,
+      return [
+        m("aside", [
+          m("a", { href: "/", class: "logo menu-item" }, "(.*)"),
+          m("a", { class: "menu-item" }, "Clone"),
+          m("a", { class: "menu-item" }, "Download"),
+          m("a", { class: "menu-item danger" }, "Delete"),
+          m("a", { class: "menu-item" }, "Help"),
+        ]),
+        m("main", { class: "main" }, [
+          m(
+            "h2",
+            {
+              class: untitled,
 
-            contenteditable: true,
-            oninput(e) {
-              dehl();
-              scratchpad.title = this.innerText.trim();
-              e.redraw = false;
-              savePad();
+              contenteditable: true,
+              oninput(e) {
+                dehl();
+                scratchpad.title = this.innerText.trim();
+                e.redraw = false;
+                savePad();
+              },
+              onkeypress(e) {
+                if (e.which == 13) e.preventDefault();
+              },
+              onfocus: (e) => {
+                selectAll(e.target);
+              },
             },
-            onkeypress(e) {
-              if (e.which == 13) e.preventDefault();
-            },
-            onfocus: (e) => {
-              selectAll(e.target);
-            },
-          },
-          m.trust(scratchpad.title || "untitled scratchpad"),
-        ),
-        m("div", { class: "monaco" }),
-      ]);
+            m.trust(scratchpad.title || "untitled scratchpad"),
+          ),
+          m("div", { class: "monaco" }),
+        ]),
+      ];
     },
   };
 }

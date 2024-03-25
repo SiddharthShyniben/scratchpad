@@ -61,27 +61,37 @@ export default function View() {
     },
 
     view() {
-      return m("main", { class: "main" }, [
-        m(
-          "h2",
-          {
-            contenteditable: true,
-            oninput(e) {
-              scratchpad.title = this.innerText.trim();
-              e.redraw = false;
-              savePad();
+      return [
+        m("main", { class: "main" }, [
+          m("aside", [
+            m("a", { href: "/", class: "logo menu-item" }, "(.*)"),
+            m("a", { href: "#!/new", class: "menu-item" }, "New"),
+            m("a", { class: "menu-item" }, "Clone"),
+            m("a", { class: "menu-item" }, "Download"),
+            m("a", { class: "menu-item danger" }, "Delete"),
+            m("a", { class: "menu-item" }, "Help"),
+          ]),
+          m(
+            "h2",
+            {
+              contenteditable: true,
+              oninput(e) {
+                scratchpad.title = this.innerText.trim();
+                e.redraw = false;
+                savePad();
+              },
+              onkeypress(e) {
+                if (e.which == 13) e.preventDefault();
+              },
+              onfocus: (e) => {
+                selectAll(e.target);
+              },
             },
-            onkeypress(e) {
-              if (e.which == 13) e.preventDefault();
-            },
-            onfocus: (e) => {
-              selectAll(e.target);
-            },
-          },
-          m.trust(scratchpad.title || "untitled scratchpad"),
-        ),
-        m("div", { class: "monaco" }),
-      ]);
+            m.trust(scratchpad.title || "untitled scratchpad"),
+          ),
+          m("div", { class: "monaco" }),
+        ]),
+      ];
     },
   };
 }

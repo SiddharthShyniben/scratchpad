@@ -140,3 +140,7 @@ a {
   background: #fff4;
   color: #eee;
 }
+
+.danger {
+  color: #ff0033;
+}
