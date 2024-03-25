@@ -67,7 +67,6 @@ function _getScratchpads() {
 function _validateData(parsed) {
   assert(Array.isArray(parsed), "`scratch` is not array");
   for (const item of parsed) {
-    console.log({ item });
     assert(type(item) == "object", "`item` is not object");
     assert(type(item.id) == "string", "`id` is not string");
     assert(type(item.date) == "number", "`date` is not number");

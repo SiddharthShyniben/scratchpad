@@ -46,7 +46,11 @@ export default function List() {
                 m(
                   "h2",
                   { class: x.title === null ? "untitled" : undefined },
-                  x.title || "untitled scratchpad",
+                  m(
+                    "a",
+                    { href: "#!/pad/" + x.id },
+                    x.title || "untitled scratchpad",
+                  ),
                 ),
                 tag,
               ]);

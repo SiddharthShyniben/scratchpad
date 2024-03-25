@@ -4,25 +4,29 @@ import { keymap } from "@codemirror/view";
 import { javascript } from "@codemirror/lang-javascript";
 import { birdsOfParadise } from "thememirror";
 import { once, selectAll } from "./util";
-import { createScratchpad, updateScratchPad } from "./scratchpad";
+import {
+  createScratchpad,
+  getScratchpad,
+  updateScratchPad,
+} from "./scratchpad";
 
-export default function New() {
-  let untitled = "untitled";
-
+export default function View() {
   let scratchpad = {
     title: null,
     pad: [{ type: "code", text: "\n\n\n" }],
   };
 
-  let editor;
-
-  const dehl = once(() => ((untitled = undefined), m.redraw()));
   const savePad = () => {
     if (!scratchpad.id) scratchpad = createScratchpad(scratchpad);
     else scratchpad = updateScratchPad(scratchpad);
   };
 
+  let editor;
+
   return {
+    oninit(vnode) {
+      scratchpad = getScratchpad(vnode.attrs.id);
+    },
     oncreate() {
       editor = new EditorView({
         extensions: [
@@ -31,7 +35,7 @@ export default function New() {
           birdsOfParadise,
           keymap.of([
             {
-              key: "Ctrl-Enter", // TODO: Shift?
+              key: "Ctrl-Enter", // TODO Shift?
               run() {
                 // TODO: run code
                 return true;
@@ -51,7 +55,7 @@ export default function New() {
       // TODO: maintain minimum lines automatically
       // TODO theming
       const transaction = editor.state.update({
-        changes: { from: 0, insert: "\n\n\n\n\n" },
+        changes: { from: 0, insert: scratchpad.pad[0].text },
       });
       editor.dispatch(transaction);
     },
@@ -61,11 +65,8 @@ export default function New() {
         m(
           "h2",
           {
-            class: untitled,
-
             contenteditable: true,
             oninput(e) {
-              dehl();
               scratchpad.title = this.innerText.trim();
               e.redraw = false;
               savePad();
