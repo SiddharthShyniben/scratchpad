@@ -18,7 +18,14 @@ export default function Home() {
 
   return {
     view() {
-      return m(view, args);
+      return [
+        m("aside", [
+          m("a", { href: "/", class: "logo menu-item" }, "(.*)"),
+          m("a", { href: "#!/new", class: "menu-item" }, "New"),
+          m("a", { class: "menu-item" }, "Help"),
+        ]),
+        m(view, args),
+      ];
     },
   };
 }

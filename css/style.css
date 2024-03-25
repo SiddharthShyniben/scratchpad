@@ -1,9 +1,24 @@
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+.material-symbols-outlined {
+  font-variation-settings:
+    "FILL" 0,
+    "wght" 400,
+    "GRAD" 0,
+    "opsz" 36;
+}
+
 html,
 body {
   margin: 0;
   font-family: "Space Mono", monospace;
   background-color: #121212;
-  color: white;
+  color: #eee;
+  overflow: hidden;
 }
 
 .splash {
@@ -84,4 +99,45 @@ pre code {
   line-height: 18px;
   overflow: hidden;
   overflow-wrap: anywhere;
+}
+
+aside {
+  position: absolute;
+  top: 0;
+  left: 0;
+  padding: 1.5rem;
+  background-color: #101010;
+  height: 100vh;
+}
+
+aside a {
+  display: block;
+  margin-bottom: 1rem;
+}
+
+.logo {
+  white-space: pre;
+  font-weight: bold;
+  font-size: 36px;
+  margin-bottom: 2rem;
+  text-decoration: none;
+  color: #eee;
+}
+
+.menu-item:hover {
+  color: #ed626c;
+}
+
+a {
+  color: #eee;
+}
+
+[contenteditable]:focus {
+  filter: brightness(1.2);
+  outline: none;
+}
+
+::selection {
+  background: #fff4;
+  color: #eee;
 }
