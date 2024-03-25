@@ -3,9 +3,10 @@ import { basicSetup, EditorView } from "codemirror";
 import { keymap } from "@codemirror/view";
 import { javascript } from "@codemirror/lang-javascript";
 import { birdsOfParadise } from "thememirror";
-import { selectAll } from "./util";
+import { downloadFile, selectAll, slugify } from "./util";
 import {
   createScratchpad,
+  deleteScratchPad,
   getScratchpad,
   updateScratchPad,
 } from "./scratchpad";
@@ -66,9 +67,46 @@ export default function View() {
           m("aside", [
             m("a", { href: "/", class: "logo menu-item" }, "(.*)"),
             m("a", { href: "#!/new", class: "menu-item" }, "New"),
-            m("a", { class: "menu-item" }, "Clone"),
-            m("a", { class: "menu-item" }, "Download"),
-            m("a", { class: "menu-item danger" }, "Delete"),
+            m(
+              "a",
+              {
+                class: "menu-item",
+                onclick() {
+                  const newPad = createScratchpad({
+                    ...scratchpad,
+                    title: scratchpad.title + " clone",
+                  });
+                  scratchpad = newPad;
+                  m.route.set("/pad/:id", { id: newPad.id });
+                  m.redraw();
+                },
+              },
+              "Clone",
+            ),
+            m(
+              "a",
+              {
+                class: "menu-item",
+                onclick() {
+                  downloadFile(
+                    slugify(scratchpad.title) + ".js",
+                    scratchpad.pad[0].text,
+                  );
+                },
+              },
+              "Download",
+            ),
+            m(
+              "a",
+              {
+                class: "menu-item danger",
+                onclick() {
+                  deleteScratchPad(scratchpad.id);
+                  m.route.set("/home");
+                },
+              },
+              "Delete",
+            ),
             m("a", { class: "menu-item" }, "Help"),
           ]),
           m(
@@ -83,7 +121,7 @@ export default function View() {
               onkeypress(e) {
                 if (e.which == 13) e.preventDefault();
               },
-              onfocus: (e) => {
+              onfocus(e) {
                 selectAll(e.target);
               },
             },

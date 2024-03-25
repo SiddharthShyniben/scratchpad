@@ -3,8 +3,12 @@ import { basicSetup, EditorView } from "codemirror";
 import { keymap } from "@codemirror/view";
 import { javascript } from "@codemirror/lang-javascript";
 import { birdsOfParadise } from "thememirror";
-import { once, selectAll } from "./util";
-import { createScratchpad, updateScratchPad } from "./scratchpad";
+import { downloadFile, once, selectAll, slugify } from "./util";
+import {
+  createScratchpad,
+  deleteScratchPad,
+  updateScratchPad,
+} from "./scratchpad";
 
 export default function New() {
   let untitled = "untitled";
@@ -52,22 +56,64 @@ export default function New() {
       });
 
       // TODO: maintain minimum lines automatically
-      // TODO theming
+      // TODO: theming
       const transaction = editor.state.update({
         changes: { from: 0, insert: "\n\n\n\n\n" },
       });
       editor.dispatch(transaction);
     },
 
+    // TODO: fluid animations?
     view() {
       return [
-        m("aside", [
-          m("a", { href: "/", class: "logo menu-item" }, "(.*)"),
-          m("a", { class: "menu-item" }, "Clone"),
-          m("a", { class: "menu-item" }, "Download"),
-          m("a", { class: "menu-item danger" }, "Delete"),
-          m("a", { class: "menu-item" }, "Help"),
-        ]),
+        m(
+          "aside",
+          [
+            m("a", { href: "/", class: "logo menu-item" }, "(.*)"),
+            scratchpad.id &&
+              m(
+                "a",
+                {
+                  class: "menu-item",
+                  onclick() {
+                    const newPad = createScratchpad({
+                      ...scratchpad,
+                      title: scratchpad.title + " clone",
+                    });
+                    m.route.set("/pad/:id", { id: newPad.id });
+                  },
+                },
+                "Clone",
+              ),
+            scratchpad.id &&
+              m(
+                "a",
+                {
+                  class: "menu-item",
+                  onclick() {
+                    downloadFile(
+                      slugify(scratchpad.title) + ".js",
+                      scratchpad.pad[0].text,
+                    );
+                  },
+                },
+                "Download",
+              ),
+            scratchpad.id &&
+              m(
+                "a",
+                {
+                  class: "menu-item danger",
+                  onclick() {
+                    deleteScratchPad(scratchpad.id);
+                    m.route.set("/home");
+                  },
+                },
+                "Delete",
+              ),
+            m("a", { class: "menu-item" }, "Help"),
+          ].filter(Boolean),
+        ),
         m("main", { class: "main" }, [
           m(
             "h2",
@@ -84,8 +130,11 @@ export default function New() {
               onkeypress(e) {
                 if (e.which == 13) e.preventDefault();
               },
-              onfocus: (e) => {
+              onfocus(e) {
                 selectAll(e.target);
+              },
+              onfocusout() {
+                m.route.set("/pad/:id", { id: scratchpad.id }); // or not?
               },
             },
             m.trust(scratchpad.title || "untitled scratchpad"),

@@ -113,3 +113,32 @@ export function selectAll(el) {
     }
   }, 1);
 }
+export function downloadFile(filename, content, type = "text/javascript") {
+  console.log({ filename, content });
+  // It works on all HTML5 Ready browsers as it uses the download attribute of the <a> element:
+  const element = document.createElement("a");
+
+  // A blob is a data type that can store binary data
+  // "type" is a MIME type
+  // It can have a different value, based on a file you want to save
+  const blob = new Blob([content], { type });
+
+  // createObjectURL() static method creates a DOMString containing a URL representing the object given in the parameter.
+  const fileUrl = URL.createObjectURL(blob);
+
+  element.setAttribute("href", fileUrl);
+  element.setAttribute("download", filename);
+  element.style.display = "none";
+
+  document.body.appendChild(element);
+  element.click();
+  document.body.removeChild(element);
+}
+
+export const slugify = (str) =>
+  str
+    .toLowerCase()
+    .trim()
+    .replace(/[^\w\s-]/g, "")
+    .replace(/[\s_-]+/g, "-")
+    .replace(/^-+|-+$/g, "");
