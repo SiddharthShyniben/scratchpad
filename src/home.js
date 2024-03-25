@@ -16,6 +16,7 @@ export default function Home() {
     m.redraw();
   });
 
+  // TODO: storage capacity thing
   return {
     view() {
       return [
