@@ -3,7 +3,7 @@ import { basicSetup, EditorView } from "codemirror";
 import { keymap } from "@codemirror/view";
 import { javascript } from "@codemirror/lang-javascript";
 import { birdsOfParadise } from "thememirror";
-import { once, selectAll } from "./util";
+import { selectAll } from "./util";
 import {
   createScratchpad,
   getScratchpad,
@@ -13,7 +13,7 @@ import {
 export default function View() {
   let scratchpad = {
     title: null,
-    pad: [{ type: "code", text: "\n\n\n" }],
+    pad: [{ type: "code", text: "" }],
   };
 
   const savePad = () => {
