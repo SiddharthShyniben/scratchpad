@@ -31,30 +31,32 @@ export default function List() {
         m("hr"),
         ...(vnode.attrs.items.length == 0
           ? [m("div", { class: "empty-screen" }, m.trust(out))]
-          : vnode.attrs.items.map((x) => {
-              const display = x.pad[0];
-              const text =
-                display.type === "code"
-                  ? truncCode(display.text)
-                  : trunc(display.text);
-              const tag =
-                display.type === "code"
-                  ? m("pre", { class: "code-display" }, m("code", text))
-                  : m("p", { class: "code-display" }, text);
+          : vnode.attrs.items
+              .sort((a, b) => b.date - a.date)
+              .map((x) => {
+                const display = x.pad[0];
+                const text =
+                  display.type === "code"
+                    ? truncCode(display.text)
+                    : trunc(display.text);
+                const tag =
+                  display.type === "code"
+                    ? m("pre", { class: "code-display" }, m("code", text))
+                    : m("p", { class: "code-display" }, text);
 
-              return m("div", { class: "pad-item" }, [
-                m(
-                  "h2",
-                  { class: x.title === null ? "untitled" : undefined },
+                return m("div", { class: "pad-item" }, [
                   m(
-                    "a",
-                    { href: "#!/pad/" + x.id },
-                    x.title || "untitled scratchpad",
+                    "h2",
+                    { class: x.title === null ? "untitled" : undefined },
+                    m(
+                      "a",
+                      { href: "#!/pad/" + x.id },
+                      x.title || "untitled scratchpad",
+                    ),
                   ),
-                ),
-                tag,
-              ]);
-            })),
+                  tag,
+                ]);
+              })),
       ]);
     },
   };
