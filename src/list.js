@@ -63,6 +63,7 @@ export default function List() {
 }
 
 function drawGrid() {
+  // PERF: Need to optimize / add disable option
   const upperText = "No scratchpads found";
   const text = "What will you code today?";
 

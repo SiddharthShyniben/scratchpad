@@ -22,6 +22,13 @@ export default function View() {
     else scratchpad = updateScratchPad(scratchpad);
   };
 
+  /*
+   * NOTE: Note to self on running code
+   * - Should I support node.js internals?
+   * - External variables?
+   * - Or just use a VM and let the user deal with it?
+   */
+
   let editor;
 
   return {
@@ -36,7 +43,7 @@ export default function View() {
           birdsOfParadise,
           keymap.of([
             {
-              key: "Ctrl-Enter", // TODO Shift?
+              key: "Ctrl-Enter", // TODO: Shift?
               run() {
                 // TODO: run code
                 return true;
@@ -54,7 +61,7 @@ export default function View() {
       });
 
       // TODO: maintain minimum lines automatically
-      // TODO theming
+      // TODO: theming
       const transaction = editor.state.update({
         changes: { from: 0, insert: scratchpad.pad[0].text },
       });
@@ -62,6 +69,7 @@ export default function View() {
     },
 
     view() {
+      // TODO: Refactor?
       return [
         m("main", { class: "main" }, [
           m("aside", [
