@@ -11,22 +11,18 @@ import {
 let out = "";
 let lines, columns;
 
-window.addEventListener(
-  "resize",
-  () => (
-    ({ lines, columns } = countLinesAndColumns(
-      document.querySelector(".empty-screen"),
-    )),
-    drawGrid()
-  ),
-);
-
 export default function List() {
   return {
     oncreate() {
-      ({ lines, columns } = countLinesAndColumns(
-        document.querySelector(".empty-screen"),
-      ));
+      const emptyElement = document.querySelector(".empty-screen");
+      if (!emptyElement) return;
+      ({ lines, columns } = countLinesAndColumns(emptyElement));
+      window.addEventListener(
+        "resize",
+        () => (
+          ({ lines, columns } = countLinesAndColumns(emptyElement)), drawGrid()
+        ),
+      );
       drawGrid();
     },
     view(vnode) {
