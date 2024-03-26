@@ -10,11 +10,11 @@ import {
   getScratchpad,
   updateScratchPad,
 } from "./scratchpad";
-import { navigating } from "./global-state";
+import { navigating, navigatingFromNew } from "./global-state";
 
 export default function View() {
   let scratchpad = {
-    title: null,
+    title: "untitled scratchpad",
     pad: [{ type: "code", text: "" }],
   };
 
@@ -31,8 +31,10 @@ export default function View() {
    */
 
   const showTransition = navigating();
-  console.log(showTransition);
   if (showTransition) navigating(false);
+
+  const showNewTransition = navigatingFromNew();
+  if (showNewTransition) navigatingFromNew(false);
 
   let editor;
 
@@ -78,18 +80,20 @@ export default function View() {
       return [
         m("main", { class: "main" }, [
           m("aside", [
-            m(m.route.Link, { href: "/", class: "logo menu-item" }, "(.*)"),
+            m(
+              m.route.Link,
+              {
+                href: "/",
+                class: "logo menu-item",
+                onclick: () => navigating(true),
+              },
+              "(.*)",
+            ),
             m(
               m.route.Link,
               {
                 href: "/new",
-                onbeforeremove(vnode) {
-                  vnode.dom.classList.add("exit");
-                  return new Promise(function (resolve) {
-                    vnode.dom.addEventListener("animationend", resolve);
-                  });
-                },
-                class: "menu-item" + (showTransition ? " enter" : ""),
+                class: "menu-item" + (showNewTransition ? " enter" : ""),
               },
               "New",
             ),
@@ -97,18 +101,21 @@ export default function View() {
               "a",
               {
                 class: "menu-item" + (showTransition ? " enter" : ""),
-                onbeforeremove(vnode) {
-                  vnode.dom.classList.remove("enter");
-                  vnode.dom.classList.add("exit");
-                  return new Promise(function (resolve) {
-                    vnode.dom.addEventListener("animationend", resolve);
-                  });
-                },
-                onclick() {
-                  const newPad = createScratchpad({
-                    ...scratchpad,
-                    title: scratchpad.title + " clone",
-                  });
+                async onclick() {
+                  const letters = [..." clone"];
+                  const addLetters = () =>
+                    new Promise((resolve) => {
+                      scratchpad.title += letters.splice(0, 1);
+                      m.redraw();
+                      if (letters.length)
+                        setTimeout(() => {
+                          addLetters().then(resolve);
+                        }, 100);
+                      else resolve();
+                    });
+                  await addLetters();
+                  const newPad = createScratchpad({ ...scratchpad });
+                  console.log(newPad);
                   scratchpad = newPad;
                   m.route.set("/pad/:id", { id: newPad.id });
                   m.redraw();
@@ -120,13 +127,6 @@ export default function View() {
               "a",
               {
                 class: "menu-item" + (showTransition ? " enter" : ""),
-                onbeforeremove(vnode) {
-                  vnode.dom.classList.removve("enter");
-                  vnode.dom.classList.add("exit");
-                  return new Promise(function (resolve) {
-                    vnode.dom.addEventListener("animationend", resolve);
-                  });
-                },
                 onclick() {
                   downloadFile(
                     slugify(scratchpad.title) + ".js",
@@ -140,13 +140,6 @@ export default function View() {
               "a",
               {
                 class: "menu-item danger" + (showTransition ? " enter" : ""),
-                onbeforeremove(vnode) {
-                  vnode.dom.classList.removve("enter");
-                  vnode.dom.classList.add("exit");
-                  return new Promise(function (resolve) {
-                    vnode.dom.addEventListener("animationend", resolve);
-                  });
-                },
                 onclick() {
                   deleteScratchPad(scratchpad.id);
                   m.route.set("/home");
@@ -154,7 +147,7 @@ export default function View() {
               },
               "Delete",
             ),
-            m("hr"),
+            m("hr", { class: showTransition ? "enter" : "" }),
             m("a", { class: "menu-item" }, "Settings"),
             m("a", { class: "menu-item" }, "Help"),
           ]),
@@ -175,7 +168,7 @@ export default function View() {
                 selectAll(e.target);
               },
             },
-            m.trust(scratchpad.title || "untitled scratchpad"),
+            m.trust(scratchpad.title),
           ),
           m("div", { class: "monaco" + (showTransition ? " enter" : "") }),
         ]),

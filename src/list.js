@@ -27,12 +27,19 @@ export default function List() {
       drawGrid();
     },
     view(vnode) {
+      const { items, showTransition } = vnode.attrs;
       return m("main", { class: "main" }, [
-        m("h1", "Your scratchpads"),
+        m("h1", { class: showTransition ? " enter" : "" }, "Your scratchpads"),
         m("hr"),
-        ...(vnode.attrs.items.length == 0
-          ? [m("div", { class: "empty-screen" }, m.trust(out))]
-          : vnode.attrs.items
+        ...(items.length == 0
+          ? [
+              m(
+                "div",
+                { class: "empty-screen" + (showTransition ? " enter" : "") },
+                m.trust(out),
+              ),
+            ]
+          : items
               .sort((a, b) => b.date - a.date)
               .map((x) => {
                 const display = x.pad[0];
@@ -55,7 +62,6 @@ export default function List() {
                         href: "#!/pad/" + x.id,
                         onclick: () => {
                           navigating(true);
-                          console.log(navigating(), 1);
                         },
                       },
                       x.title || "untitled scratchpad",

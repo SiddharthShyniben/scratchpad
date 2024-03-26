@@ -3,12 +3,9 @@ import { basicSetup, EditorView } from "codemirror";
 import { keymap } from "@codemirror/view";
 import { javascript } from "@codemirror/lang-javascript";
 import { birdsOfParadise } from "thememirror";
-import { downloadFile, once, selectAll, slugify } from "./util";
-import {
-  createScratchpad,
-  deleteScratchPad,
-  updateScratchPad,
-} from "./scratchpad";
+import { once, selectAll } from "./util";
+import { createScratchpad, updateScratchPad } from "./scratchpad";
+import { navigating, navigatingFromNew } from "./global-state";
 
 export default function New() {
   let untitled = true;
@@ -65,14 +62,19 @@ export default function New() {
 
     view() {
       return [
-        m(
-          "aside",
-          [
-            m("a", { href: "/", class: "logo menu-item" }, "(.*)"),
-            m("a", { class: "menu-item enter" }, "Settings"),
-            m("a", { class: "menu-item" }, "Help"),
-          ].filter(Boolean),
-        ),
+        m("aside", [
+          m(
+            m.route.Link,
+            {
+              href: "/",
+              class: "logo menu-item",
+              onclick: () => navigating(true),
+            },
+            "(.*)",
+          ),
+          m("a", { class: "menu-item" }, "Settings"),
+          m("a", { class: "menu-item" }, "Help"),
+        ]),
         m("main", { class: "main" }, [
           m(
             "h2",
@@ -87,15 +89,18 @@ export default function New() {
               },
               onkeypress(e) {
                 if (e.which == 13) e.preventDefault();
-                r.redraw = false;
+                e.redraw = false;
               },
               onfocus(e) {
                 selectAll(e.target);
-                r.redraw = false;
+                e.redraw = false;
               },
               onfocusout() {
-                if (scratchpad.id)
+                if (scratchpad.id) {
+                  navigating(true);
+                  navigatingFromNew(true);
                   m.route.set("/pad/:id", { id: scratchpad.id }); // or not?
+                }
               },
             },
             m.trust(scratchpad.title || "untitled scratchpad"),

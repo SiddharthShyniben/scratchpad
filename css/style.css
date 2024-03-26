@@ -125,6 +125,8 @@ aside a {
 
 a {
   color: #eee;
+  text-decoration: underline;
+  cursor: pointer;
 }
 
 [contenteditable]:focus {
@@ -213,4 +215,9 @@ a {
     opacity: 0;
     max-height: 0px;
   }
+}
+
+.duplicating {
+  transition: 0.5s;
+  opacity: 0.5;
 }

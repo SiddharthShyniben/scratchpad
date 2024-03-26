@@ -1,4 +1,5 @@
 import m from "mithril";
+import { navigating } from "./global-state";
 import List from "./list";
 import { getScratchpads } from "./scratchpad";
 import Splash from "./splash";
@@ -10,9 +11,12 @@ async function fetchData() {
 export default function Home() {
   let view = Splash;
   let args = undefined;
+
+  const showTransition = navigating();
+  if (showTransition) navigating(false);
   fetchData().then((items) => {
     view = List;
-    args = { items };
+    args = { items, showTransition };
     m.redraw();
   });
 

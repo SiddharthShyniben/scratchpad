@@ -52,7 +52,8 @@ export function truncCode(text, lines = 15) {
 }
 
 export const rand = (list) => list[Math.floor(Math.random() * list.length)];
-export const alphabet = "abcdefghijklmnopqrstuvwxyz_/?$%!@#";
+export const alphabet =
+  "abcdefghijklmnopqrstuvwxyz!@#$%^&*()_-+=~`\"';:>,<./?{}[]1234567890";
 
 export function countLinesAndColumns(el) {
   const divHeight = el.offsetHeight;
