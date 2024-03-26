@@ -10,6 +10,7 @@ import {
   getScratchpad,
   updateScratchPad,
 } from "./scratchpad";
+import { navigating } from "./global-state";
 
 export default function View() {
   let scratchpad = {
@@ -28,6 +29,10 @@ export default function View() {
    * - External variables?
    * - Or just use a VM and let the user deal with it?
    */
+
+  const showTransition = navigating();
+  console.log(showTransition);
+  if (showTransition) navigating(false);
 
   let editor;
 
@@ -73,12 +78,32 @@ export default function View() {
       return [
         m("main", { class: "main" }, [
           m("aside", [
-            m("a", { href: "/", class: "logo menu-item" }, "(.*)"),
-            m("a", { href: "#!/new", class: "menu-item" }, "New"),
+            m(m.route.Link, { href: "/", class: "logo menu-item" }, "(.*)"),
+            m(
+              m.route.Link,
+              {
+                href: "/new",
+                onbeforeremove(vnode) {
+                  vnode.dom.classList.add("exit");
+                  return new Promise(function (resolve) {
+                    vnode.dom.addEventListener("animationend", resolve);
+                  });
+                },
+                class: "menu-item" + (showTransition ? " enter" : ""),
+              },
+              "New",
+            ),
             m(
               "a",
               {
-                class: "menu-item",
+                class: "menu-item" + (showTransition ? " enter" : ""),
+                onbeforeremove(vnode) {
+                  vnode.dom.classList.remove("enter");
+                  vnode.dom.classList.add("exit");
+                  return new Promise(function (resolve) {
+                    vnode.dom.addEventListener("animationend", resolve);
+                  });
+                },
                 onclick() {
                   const newPad = createScratchpad({
                     ...scratchpad,
@@ -94,7 +119,14 @@ export default function View() {
             m(
               "a",
               {
-                class: "menu-item",
+                class: "menu-item" + (showTransition ? " enter" : ""),
+                onbeforeremove(vnode) {
+                  vnode.dom.classList.removve("enter");
+                  vnode.dom.classList.add("exit");
+                  return new Promise(function (resolve) {
+                    vnode.dom.addEventListener("animationend", resolve);
+                  });
+                },
                 onclick() {
                   downloadFile(
                     slugify(scratchpad.title) + ".js",
@@ -107,7 +139,14 @@ export default function View() {
             m(
               "a",
               {
-                class: "menu-item danger",
+                class: "menu-item danger" + (showTransition ? " enter" : ""),
+                onbeforeremove(vnode) {
+                  vnode.dom.classList.removve("enter");
+                  vnode.dom.classList.add("exit");
+                  return new Promise(function (resolve) {
+                    vnode.dom.addEventListener("animationend", resolve);
+                  });
+                },
                 onclick() {
                   deleteScratchPad(scratchpad.id);
                   m.route.set("/home");
@@ -115,11 +154,14 @@ export default function View() {
               },
               "Delete",
             ),
+            m("hr"),
+            m("a", { class: "menu-item" }, "Settings"),
             m("a", { class: "menu-item" }, "Help"),
           ]),
           m(
             "h2",
             {
+              class: showTransition ? "enter" : "",
               contenteditable: true,
               oninput(e) {
                 scratchpad.title = this.innerText.trim();
@@ -135,7 +177,7 @@ export default function View() {
             },
             m.trust(scratchpad.title || "untitled scratchpad"),
           ),
-          m("div", { class: "monaco" }),
+          m("div", { class: "monaco" + (showTransition ? " enter" : "") }),
         ]),
       ];
     },

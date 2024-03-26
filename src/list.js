@@ -1,4 +1,5 @@
 import m from "mithril";
+import { navigating } from "./global-state";
 import {
   alphabet,
   colors,
@@ -50,7 +51,13 @@ export default function List() {
                     { class: x.title === null ? "untitled" : undefined },
                     m(
                       "a",
-                      { href: "#!/pad/" + x.id },
+                      {
+                        href: "#!/pad/" + x.id,
+                        onclick: () => {
+                          navigating(true);
+                          console.log(navigating(), 1);
+                        },
+                      },
                       x.title || "untitled scratchpad",
                     ),
                   ),

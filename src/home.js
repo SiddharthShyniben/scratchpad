@@ -23,6 +23,8 @@ export default function Home() {
         m("aside", [
           m("a", { href: "/", class: "logo menu-item" }, "(.*)"),
           m("a", { href: "#!/new", class: "menu-item" }, "New"),
+          m("hr"),
+          m("a", { class: "menu-item" }, "Settings"),
           m("a", { class: "menu-item" }, "Help"),
         ]),
         m(view, args),

@@ -11,7 +11,7 @@ import {
 } from "./scratchpad";
 
 export default function New() {
-  let untitled = "untitled";
+  let untitled = true;
 
   let scratchpad = {
     title: null,
@@ -21,7 +21,7 @@ export default function New() {
   let editor;
   let first = true;
 
-  const dehl = once(() => ((untitled = undefined), m.redraw()));
+  const dehl = once(() => ((untitled = false), m.redraw()));
   const savePad = () => {
     if (!scratchpad.id) scratchpad = createScratchpad(scratchpad);
     else scratchpad = updateScratchPad(scratchpad);
@@ -63,54 +63,13 @@ export default function New() {
       editor.dispatch(transaction);
     },
 
-    // TODO: fluid animations?
     view() {
       return [
         m(
           "aside",
           [
             m("a", { href: "/", class: "logo menu-item" }, "(.*)"),
-            scratchpad.id &&
-              m(
-                "a",
-                {
-                  class: "menu-item",
-                  onclick() {
-                    const newPad = createScratchpad({
-                      ...scratchpad,
-                      title: scratchpad.title + " clone",
-                    });
-                    m.route.set("/pad/:id", { id: newPad.id });
-                  },
-                },
-                "Clone",
-              ),
-            scratchpad.id &&
-              m(
-                "a",
-                {
-                  class: "menu-item",
-                  onclick() {
-                    downloadFile(
-                      slugify(scratchpad.title) + ".js",
-                      scratchpad.pad[0].text,
-                    );
-                  },
-                },
-                "Download",
-              ),
-            scratchpad.id &&
-              m(
-                "a",
-                {
-                  class: "menu-item danger",
-                  onclick() {
-                    deleteScratchPad(scratchpad.id);
-                    m.route.set("/home");
-                  },
-                },
-                "Delete",
-              ),
+            m("a", { class: "menu-item enter" }, "Settings"),
             m("a", { class: "menu-item" }, "Help"),
           ].filter(Boolean),
         ),
@@ -118,8 +77,7 @@ export default function New() {
           m(
             "h2",
             {
-              class: untitled,
-
+              class: `enter ${untitled ? "untitled" : ""}`,
               contenteditable: true,
               oninput(e) {
                 dehl();
@@ -129,17 +87,20 @@ export default function New() {
               },
               onkeypress(e) {
                 if (e.which == 13) e.preventDefault();
+                r.redraw = false;
               },
               onfocus(e) {
                 selectAll(e.target);
+                r.redraw = false;
               },
               onfocusout() {
-                m.route.set("/pad/:id", { id: scratchpad.id }); // or not?
+                if (scratchpad.id)
+                  m.route.set("/pad/:id", { id: scratchpad.id }); // or not?
               },
             },
             m.trust(scratchpad.title || "untitled scratchpad"),
           ),
-          m("div", { class: "monaco" }),
+          m("div", { class: "monaco enter" }),
         ]),
       ];
     },
