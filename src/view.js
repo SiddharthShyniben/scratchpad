@@ -11,11 +11,20 @@ import {
   updateScratchPad,
 } from "./scratchpad";
 import { navigating, navigatingFromNew } from "./global-state";
+import VM from "vm-browserify";
 
 export default function View() {
   let scratchpad = {
     title: "untitled scratchpad",
     pad: [{ type: "code", text: "" }],
+  };
+
+  const outputTypeTable = {
+    string:
+      '<span class="type string material-symbols-outlined">format_quote</span>',
+    number: '<span class="type number material-symbols-outlined">tag</span>',
+    object:
+      '<span class="type object material-symbols-outlined">data_object</span>',
   };
 
   const savePad = () => {
@@ -36,7 +45,8 @@ export default function View() {
   const showNewTransition = navigatingFromNew();
   if (showNewTransition) navigatingFromNew(false);
 
-  let editor;
+  let editor,
+    terminalOutput = [];
 
   return {
     oninit(vnode) {
@@ -52,7 +62,28 @@ export default function View() {
             {
               key: "Ctrl-Enter", // TODO: Shift?
               run() {
-                // TODO: run code
+                terminalOutput = [];
+                const code = editor.state.doc.toString();
+                const script = new VM.Script(code, {
+                  filename: slugify(scratchpad.title),
+                });
+                const context = VM.createContext({
+                  console: {
+                    // TODO: multiple inputs, but preserve type if only one
+                    log: (out) =>
+                      terminalOutput.push({ type: "log", out: out }),
+                    warn: (out) =>
+                      terminalOutput.push({ type: "warn", out: out }),
+                    error: (out) =>
+                      terminalOutput.push({
+                        type: "error",
+                        out: out,
+                      }),
+                  },
+                });
+                const output = script.runInContext(context);
+                terminalOutput.push({ type: "output", out: output });
+                m.redraw();
                 return true;
               },
             },
@@ -115,7 +146,6 @@ export default function View() {
                     });
                   await addLetters();
                   const newPad = createScratchpad({ ...scratchpad });
-                  console.log(newPad);
                   scratchpad = newPad;
                   m.route.set("/pad/:id", { id: newPad.id });
                   m.redraw();
@@ -171,6 +201,21 @@ export default function View() {
             m.trust(scratchpad.title),
           ),
           m("div", { class: "monaco" + (showTransition ? " enter" : "") }),
+          ...(terminalOutput.length
+            ? terminalOutput.map(
+                (
+                  x, // TODO: Unescape
+                ) =>
+                  m("p", { class: "terminal-output " + x.type }, [
+                    m.trust(outputTypeTable[typeof x.out]),
+                    m.trust(
+                      JSON.stringify(x.out, null, 2)
+                        .replaceAll("\n", "<br>")
+                        .replaceAll(" ", "&nbsp;"),
+                    ),
+                  ]),
+              )
+            : [undefined]),
         ]),
       ];
     },

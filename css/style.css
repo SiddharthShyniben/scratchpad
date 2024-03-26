@@ -221,3 +221,42 @@ a {
   transition: 0.5s;
   opacity: 0.5;
 }
+
+/* TODO: Animate */
+.terminal-output {
+  display: block;
+  color: #eee;
+  border: 2px solid #ffffff55;
+  border-radius: 3px;
+  padding: 0.2rem;
+  font-size: 14px;
+  margin: 5px 0;
+
+  display: flex;
+  align-items: center;
+}
+
+.terminal-output.warn {
+  border-color: #d5b60a;
+}
+
+.terminal-output.error {
+  border-color: #ff0033;
+}
+
+.terminal-output .type {
+  margin: 0 1rem;
+  font-size: 16px;
+}
+
+.type.number {
+  color: rgb(51, 178, 119);
+}
+
+.type.string {
+  color: rgb(221, 101, 70);
+}
+
+.type.object {
+  color: rgb(226, 119, 47);
+}
