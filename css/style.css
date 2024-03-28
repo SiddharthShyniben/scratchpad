@@ -1,5 +1,7 @@
 :root {
   --theme-color: #ed626c;
+  --bg-color: #121212;
+  --fg-color: #eeeeee;
 }
 
 *,
@@ -20,8 +22,52 @@ html,
 body {
   margin: 0;
   font-family: "Space Mono", monospace;
-  background-color: #121212;
-  color: #eee;
+  background-color: var(--bg-color);
+  color: var(--fg-color);
+}
+
+a {
+  color: var(--fg-color);
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+aside {
+  position: fixed;
+  top: 0;
+  left: 0;
+  padding: 1.5rem;
+  background-color: #101010;
+  height: 100vh;
+}
+
+aside a {
+  display: block;
+  margin-bottom: 1rem;
+}
+
+aside hr {
+  border: 1px solid #ffffff55;
+}
+
+pre {
+  background: black;
+  padding: 1rem;
+}
+
+pre code {
+  display: block;
+  white-space: pre;
+  -webkit-overflow-scrolling: touch;
+  overflow-x: scroll;
+  max-width: 100%;
+  min-width: 100px;
+  padding: 0;
+}
+
+:not(aside) > hr {
+  margin-bottom: 4rem;
+  border: 1px solid #ef626c;
 }
 
 .splash {
@@ -44,32 +90,8 @@ body {
   margin: 3rem auto;
 }
 
-aside hr {
-  border: 1px solid #ffffff55;
-}
-
-:not(aside) > hr {
-  margin-bottom: 4rem;
-  border: 1px solid #ef626c;
-}
-
 .pad-item {
   margin-bottom: 2rem;
-}
-
-pre {
-  background: black;
-  padding: 1rem;
-}
-
-pre code {
-  display: block;
-  white-space: pre;
-  -webkit-overflow-scrolling: touch;
-  overflow-x: scroll;
-  max-width: 100%;
-  min-width: 100px;
-  padding: 0;
 }
 
 .untitled {
@@ -84,30 +106,12 @@ pre code {
   z-index: 2;
 }
 
-.dud {
-  color: grey;
-}
-
 .empty-screen {
   height: calc(80vh - 5rem);
   padding: 0;
   line-height: 18px;
   overflow: hidden;
   overflow-wrap: anywhere;
-}
-
-aside {
-  position: fixed;
-  top: 0;
-  left: 0;
-  padding: 1.5rem;
-  background-color: #101010;
-  height: 100vh;
-}
-
-aside a {
-  display: block;
-  margin-bottom: 1rem;
 }
 
 .logo {
@@ -123,12 +127,6 @@ aside a {
   color: var(--theme-color);
 }
 
-a {
-  color: #eee;
-  text-decoration: underline;
-  cursor: pointer;
-}
-
 [contenteditable]:focus {
   filter: brightness(1.2);
   outline: none;
@@ -136,7 +134,7 @@ a {
 
 ::selection {
   background: #fff4;
-  color: #eee;
+  color: var(--fg-color);
 }
 
 .danger {
@@ -169,9 +167,11 @@ a {
 .enter {
   animation: fade-in 0.5s;
 }
+
 .menu-item.enter {
   animation: fade-grow-in 0.5s forwards;
 }
+
 @keyframes fade-in {
   from {
     opacity: 0;
@@ -180,6 +180,7 @@ a {
     opacity: 1;
   }
 }
+
 @keyframes fade-grow-in {
   0% {
     opacity: 0;
@@ -194,9 +195,11 @@ a {
 .exit {
   animation: fade-out 0.5s;
 }
+
 .menu-item.exit {
   animation: fade-grow-out 0.5s;
 }
+
 @keyframes fade-out {
   from {
     opacity: 1;
@@ -225,7 +228,7 @@ a {
 /* TODO: Animate */
 .terminal-output {
   display: block;
-  color: #eee;
+  color: var(--fg-color);
   border: 2px solid #ffffff55;
   border-radius: 3px;
   padding: 0.2rem;
@@ -250,7 +253,7 @@ a {
 }
 
 .terminal-output.debug {
-  border-color: lightcyan;
+  border-color: #e0ffff;
 }
 
 .terminal-output .type {
@@ -259,15 +262,15 @@ a {
 }
 
 .type.number {
-  color: rgb(51, 178, 119);
+  color: #33b277;
 }
 
 .type.string {
-  color: rgb(221, 101, 70);
+  color: #dd6446;
 }
 
 .type.object {
-  color: rgb(226, 119, 47);
+  color: #e2772f;
 }
 
 .type.timer {
@@ -296,10 +299,6 @@ table.terminal-output tbody {
 
 table.terminal-output {
   padding: 0;
-}
-
-small {
-  color: #aaa;
 }
 
 button {

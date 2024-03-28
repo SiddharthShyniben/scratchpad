@@ -1,7 +1,9 @@
 import m from "mithril";
+
 import { navigating } from "./global-state";
-import List from "./list";
 import { getScratchpads } from "./scratchpad";
+
+import List from "./list";
 import Splash from "./splash";
 
 async function fetchData() {
