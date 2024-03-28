@@ -156,3 +156,16 @@ export const stringify = (x) => {
   if (type(x) == "object" || type(x) == "array") return JSON.stringify(x);
   return x + "";
 };
+
+export const outputTypeTable = {
+  string:
+    '<span class="type string material-symbols-outlined">format_quote</span>',
+  number: '<span class="type number material-symbols-outlined">tag</span>',
+  object:
+    '<span class="type object material-symbols-outlined">data_object</span>',
+  "no-output":
+    '<span class="type number material-symbols-outlined">task</span>',
+  table: '<span class="type number material-symbols-outlined">table</span>',
+  time: '<span class="type timer material-symbols-outlined">timer</span>',
+  trace: '<span class="type trace material-symbols-outlined">footprint</span>',
+};

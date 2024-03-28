@@ -3,7 +3,14 @@ import { basicSetup, EditorView } from "codemirror";
 import { keymap } from "@codemirror/view";
 import { javascript } from "@codemirror/lang-javascript";
 import { birdsOfParadise } from "thememirror";
-import { downloadFile, selectAll, slugify, stringify, type } from "./util";
+import {
+  downloadFile,
+  outputTypeTable,
+  selectAll,
+  slugify,
+  stringify,
+  type,
+} from "./util";
 import {
   createScratchpad,
   deleteScratchPad,
@@ -18,20 +25,6 @@ export default function View() {
   let scratchpad = {
     title: "untitled scratchpad",
     pad: [{ type: "code", text: "" }],
-  };
-
-  const outputTypeTable = {
-    string:
-      '<span class="type string material-symbols-outlined">format_quote</span>',
-    number: '<span class="type number material-symbols-outlined">tag</span>',
-    object:
-      '<span class="type object material-symbols-outlined">data_object</span>',
-    "no-output":
-      '<span class="type number material-symbols-outlined">task</span>',
-    table: '<span class="type number material-symbols-outlined">table</span>',
-    time: '<span class="type timer material-symbols-outlined">timer</span>',
-    trace:
-      '<span class="type trace material-symbols-outlined">footprint</span>',
   };
 
   const savePad = () => {
@@ -52,70 +45,15 @@ export default function View() {
   const showNewTransition = navigatingFromNew();
   if (showNewTransition) navigatingFromNew(false);
 
-  let editor,
-    terminalOutput = [];
+  let terminalOutput = [];
+
+  const editors = [];
 
   return {
     oninit(vnode) {
       scratchpad = getScratchpad(vnode.attrs.id);
     },
-    oncreate() {
-      editor = new EditorView({
-        extensions: [
-          basicSetup,
-          javascript(),
-          birdsOfParadise,
-          keymap.of([
-            {
-              key: "Ctrl-Enter", // TODO: Shift?
-              run() {
-                terminalOutput = [];
-                const code = editor.state.doc.toString();
-                const script = new VM.Script(code, {
-                  filename: slugify(scratchpad.title),
-                });
-
-                const [_context, getOutput] = contextMachine();
-                const context = VM.createContext(_context);
-                const output = script.runInContext(context);
-
-                terminalOutput.push(...getOutput());
-                if (output)
-                  terminalOutput.push({
-                    type: "output",
-                    out: stringify(output),
-                    typeActual: type(output),
-                  });
-
-                if (terminalOutput.length == 0)
-                  terminalOutput.push({
-                    type: "no-output",
-                    out: "No output",
-                    typeActual: "string",
-                  });
-
-                m.redraw();
-                return true;
-              },
-            },
-          ]),
-          EditorView.updateListener.of((v) => {
-            if (v.docChanged) {
-              scratchpad.pad[0].text = editor.state.doc.toString();
-              savePad();
-            }
-          }),
-        ],
-        parent: document.querySelector(".monaco"), // >:)
-      });
-
-      // TODO: maintain minimum lines automatically
-      // TODO: theming
-      const transaction = editor.state.update({
-        changes: { from: 0, insert: scratchpad.pad[0].text },
-      });
-      editor.dispatch(transaction);
-    },
+    oncreate() {},
 
     view() {
       // TODO: Refactor?
@@ -211,7 +149,63 @@ export default function View() {
             },
             m.trust(scratchpad.title),
           ),
-          m("div", { class: "monaco" + (showTransition ? " enter" : "") }),
+          ...scratchpad.pad.map((_, i) => {
+            const className = "monaco-" + i; // >:)
+            return m("div", {
+              oncreate() {
+                const editor = new EditorView({
+                  extensions: [
+                    basicSetup,
+                    javascript(),
+                    birdsOfParadise,
+                    keymap.of([
+                      {
+                        key: "Ctrl-Enter", // TODO: Shift?
+                        run() {
+                          terminalOutput = [];
+                          const code = editor.state.doc.toString();
+                          const script = new VM.Script(code, {
+                            filename: slugify(scratchpad.title),
+                          });
+
+                          const [_context, getOutput] = contextMachine();
+                          const context = VM.createContext(_context);
+                          const output = script.runInContext(context);
+
+                          terminalOutput.push(...getOutput());
+                          if (output)
+                            terminalOutput.push({
+                              type: "output",
+                              out: stringify(output),
+                              typeActual: type(output),
+                            });
+
+                          if (terminalOutput.length == 0)
+                            terminalOutput.push({
+                              type: "no-output",
+                              out: "No output",
+                              typeActual: "string",
+                            });
+
+                          m.redraw();
+                          return true;
+                        },
+                      },
+                    ]),
+                    EditorView.updateListener.of((v) => {
+                      if (v.docChanged) {
+                        scratchpad.pad[i].text = editor.state.doc.toString();
+                        savePad();
+                      }
+                    }),
+                  ],
+                  parent: document.querySelector(className),
+                });
+                editors.push(editor);
+              },
+              class: className + (showTransition ? " enter" : ""),
+            });
+          }),
           ...terminalOutput.map((x) =>
             x.type == "table"
               ? m.trust(x.out)
