@@ -297,3 +297,53 @@ table.terminal-output tbody {
 table.terminal-output {
   padding: 0;
 }
+
+small {
+  color: #aaa;
+}
+
+button {
+  border: none;
+  font-family: "Space Mono", sans-serif;
+  margin: 0 0 0.3rem 0;
+  background: none;
+  color: #ccc;
+  cursor: pointer;
+}
+
+button.run {
+  color: #b0db43;
+}
+
+button:not(.run):hover {
+  color: white;
+}
+
+button.run:hover {
+  filter: brightness(1.3);
+}
+
+.block {
+  display: flex;
+  flex-direction: column;
+}
+
+.block .buttons {
+  align-self: flex-end;
+}
+
+button .material-symbols-outlined {
+  vertical-align: middle;
+}
+
+button:not(.run) {
+  display: none;
+}
+
+.block:hover button {
+  display: initial;
+}
+
+.block {
+  margin-bottom: 2rem;
+}

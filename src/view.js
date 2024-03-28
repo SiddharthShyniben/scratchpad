@@ -46,6 +46,7 @@ export default function View() {
   if (showNewTransition) navigatingFromNew(false);
 
   let terminalOutput = [];
+  let terminalOutputPoint;
 
   const editors = [];
 
@@ -109,7 +110,7 @@ export default function View() {
                 onclick() {
                   downloadFile(
                     slugify(scratchpad.title) + ".js",
-                    scratchpad.pad[0].text,
+                    scratchpad.pad[0].text, // FIXME:
                   );
                 },
               },
@@ -149,83 +150,182 @@ export default function View() {
             },
             m.trust(scratchpad.title),
           ),
-          ...scratchpad.pad.map((_, i) => {
-            const className = "monaco-" + i; // >:)
-            return m("div", {
-              oncreate() {
-                const editor = new EditorView({
-                  extensions: [
-                    basicSetup,
-                    javascript(),
-                    birdsOfParadise,
-                    keymap.of([
-                      {
-                        key: "Ctrl-Enter", // TODO: Shift?
-                        run() {
-                          terminalOutput = [];
-                          const code = editor.state.doc.toString();
-                          const script = new VM.Script(code, {
-                            filename: slugify(scratchpad.title),
-                          });
-
-                          const [_context, getOutput] = contextMachine();
-                          const context = VM.createContext(_context);
-                          let output;
-                          try {
-                            output = script.runInContext(context);
-                          } catch (e) {
-                            context.console.error(e.stack);
-                          }
-
-                          terminalOutput.push(...getOutput());
-                          if (output)
-                            terminalOutput.push({
-                              type: "output",
-                              out: stringify(output),
-                              typeActual: type(output),
-                            });
-
-                          if (terminalOutput.length == 0)
-                            terminalOutput.push({
-                              type: "no-output",
-                              out: "No output",
-                              typeActual: "string",
-                            });
-
-                          m.redraw();
-                          return true;
-                        },
-                      },
-                    ]),
-                    EditorView.updateListener.of((v) => {
-                      if (v.docChanged) {
-                        scratchpad.pad[i].text = editor.state.doc.toString();
-                        savePad();
-                      }
-                    }),
-                  ],
-                  parent: document.querySelector("." + className),
-                });
-                editors.push(editor);
-              },
-              class: className + (showTransition ? " enter" : ""),
-            });
-          }),
-          ...terminalOutput.map((x) =>
-            x.type == "table"
-              ? m.trust(x.out)
-              : m("p", { class: "terminal-output " + x.type }, [
-                  // TODO: debug toggle
-                  m.trust(
-                    outputTypeTable[x.type] || outputTypeTable[x.typeActual],
+          m(
+            "div",
+            scratchpad.pad.map((_, i) => {
+              const className = "monaco-" + i; // >:)
+              return m("div", { class: "block", key: i }, [
+                m("div", { class: "buttons" }, [
+                  m(
+                    "button",
+                    m(
+                      "span",
+                      { class: "material-symbols-outlined" },
+                      "edit_note",
+                    ),
                   ),
-                  m.trust(
-                    x.out.replaceAll("\n", "<br>").replaceAll(" ", "&nbsp;"),
+                  m(
+                    "button",
+                    {
+                      onclick: () => {
+                        scratchpad.pad.splice(i + 1, 0, {
+                          type: "code",
+                          text: "",
+                        });
+                        m.redraw();
+                        editors.forEach(({ editor, i }) => {
+                          console.log(editor.dom, scratchpad.pad[i]);
+                          const transaction = editor.state.update({
+                            changes: {
+                              from: 0,
+                              to: editor.state.doc.length,
+                              insert: scratchpad.pad[i].text,
+                            },
+                          });
+                          editor.dispatch(transaction);
+                        });
+                        savePad();
+                      },
+                    },
+                    m("span", { class: "material-symbols-outlined" }, "code"),
+                  ),
+                  m(
+                    "button",
+                    { class: "run", onclick: () => run(i) },
+                    m(
+                      "span",
+                      { class: "material-symbols-outlined" },
+                      "fast_forward",
+                    ),
                   ),
                 ]),
+                m("div", {
+                  oncreate() {
+                    // PERF: This may spawn a new editor every time a new pad is added, even for pre-existing editors.
+                    // Maybe the VDOM prevents that, but I need to verify
+                    const editor = new EditorView({
+                      extensions: [
+                        basicSetup,
+                        javascript(),
+                        birdsOfParadise,
+                        keymap.of([
+                          {
+                            key: "Shift-Enter",
+                            run() {
+                              run(i);
+                              return true;
+                            },
+                          },
+                        ]),
+                        keymap.of([
+                          {
+                            key: "Ctrl-Enter",
+                            run() {
+                              scratchpad.pad.splice(i + 1, 0, {
+                                type: "code",
+                                text: "",
+                              });
+                              m.redraw();
+                              editors.forEach(({ editor, i }) => {
+                                const transaction = editor.state.update({
+                                  changes: {
+                                    from: 0,
+                                    to: editor.state.doc.length,
+                                    insert: scratchpad.pad[i].text,
+                                  },
+                                });
+                                editor.dispatch(transaction);
+                              });
+                              const x = editors.find(
+                                ({ i: _i }) => _i == i + 1,
+                              );
+                              if (x) x.editor.focus();
+                              savePad();
+                              return true;
+                            },
+                          },
+                        ]),
+                        EditorView.updateListener.of((v) => {
+                          if (v.docChanged) {
+                            scratchpad.pad[i].text =
+                              editor.state.doc.toString();
+                            savePad();
+                          }
+                        }),
+                      ],
+                      parent: document.querySelector("." + className),
+                    });
+                    const transaction = editor.state.update({
+                      changes: { from: 0, insert: scratchpad.pad[i].text },
+                    });
+                    editor.dispatch(transaction);
+                    editors.push({ i, editor });
+                  },
+                  class: className + (showTransition ? " enter" : ""),
+                }),
+                ...(i == terminalOutputPoint
+                  ? terminalOutput.map((x) =>
+                      x.type == "table"
+                        ? m.trust(x.out)
+                        : m("p", { class: "terminal-output " + x.type }, [
+                            // TODO: debug toggle
+                            m.trust(
+                              outputTypeTable[x.type] ||
+                                outputTypeTable[x.typeActual],
+                            ),
+                            m.trust(
+                              x.out
+                                .replaceAll("\n", "<br>")
+                                .replaceAll(" ", "&nbsp;"),
+                            ),
+                          ]),
+                    )
+                  : []),
+              ]);
+            }),
           ),
         ]),
       ];
     },
   };
+
+  function run(i) {
+    terminalOutput = [];
+    const all = editors.filter((e) => e.i <= i).sort((a, b) => a.i - b.i);
+    const code = all
+      .map(({ editor }) => editor.state.doc.toString())
+      .join("\n\n");
+    const script = new VM.Script(code, {
+      filename: slugify(scratchpad.title),
+    });
+
+    const [_context, getOutput] = contextMachine();
+    const context = VM.createContext(_context);
+    let output;
+    try {
+      output = script.runInContext(context);
+    } catch (e) {
+      context.console.error(e.stack);
+    }
+
+    terminalOutput.push(...getOutput());
+    if (output)
+      terminalOutput.push({
+        type: "output",
+        out: stringify(output),
+        typeActual: type(output),
+      });
+
+    if (terminalOutput.length == 0)
+      terminalOutput.push({
+        type: "no-output",
+        out: "No output",
+        typeActual: "string",
+      });
+
+    terminalOutputPoint = i;
+
+    m.redraw();
+    return true;
+  }
 }
