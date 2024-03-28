@@ -83,8 +83,8 @@ export default function New() {
               class: `enter ${untitled ? "untitled" : ""}`,
               contenteditable: true,
               oninput(e) {
-                dehl();
                 e.redraw = false;
+                dehl();
                 scratchpad.title = this.innerText.trim();
                 savePad();
               },

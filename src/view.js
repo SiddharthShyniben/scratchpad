@@ -117,9 +117,26 @@ export default function View() {
               "a",
               {
                 class: "menu-item danger" + (showTransition ? " enter" : ""),
-                onclick() {
-                  deleteScratchPad(scratchpad.id);
-                  m.route.set("/home");
+                onclick(e) {
+                  console.log(e.target.innerText);
+                  if (e.target.innerText == "Delete") {
+                    const replacement = "Really?";
+                    let i = 1;
+
+                    const replace = () => {
+                      e.target.innerText =
+                        replacement.slice(0, i) + e.target.innerText.slice(i);
+                      i++;
+                      if (i <= replacement.length) setTimeout(replace, 50);
+                    };
+
+                    replace();
+
+                    setTimeout(() => e.target.innerText = "Delete", 5000)
+                  } else {
+                    deleteScratchPad(scratchpad.id);
+                    m.route.set("/home");
+                  }
                 },
               },
               "Delete",
