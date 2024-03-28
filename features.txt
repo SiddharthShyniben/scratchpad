@@ -1,1 +1,3 @@
 - Recovery if data is corrupted
+- Localstorage in the Localstorage?
+- importing other repls?

@@ -1,7 +1,5 @@
 import m from "mithril";
 
-// PERF: This whole file is pointless
-
 export default function Splash() {
   let text = "(.*)";
 

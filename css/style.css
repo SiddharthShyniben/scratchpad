@@ -253,7 +253,7 @@ pre code {
 }
 
 .terminal-output.debug {
-  border-color: #e0ffff;
+  border-color: #a0ffff;
 }
 
 .terminal-output .type {
@@ -354,4 +354,22 @@ button:not(.run) {
 
 .para:empty:focus::before {
   content: "";
+}
+
+.setting input {
+  margin-right: 1rem;
+}
+
+.setting p {
+  color: #bbb;
+  margin-top: 0;
+  margin-left: calc(2rem - 3px);
+}
+
+.setting {
+  margin-bottom: 2rem;
+}
+
+input[type="checkbox"] {
+  accent-color: var(--theme-color);
 }

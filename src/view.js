@@ -53,7 +53,6 @@ export default function View() {
     oncreate() {},
 
     view() {
-      // TODO: Refactor?
       return [
         m("main", { class: "main" }, [
           m("aside", [
@@ -108,7 +107,7 @@ export default function View() {
                       .map((x) =>
                         x.type == "code" ? x.text : `/* \n${x.text}\n */`,
                       )
-                      .join("\n\n"), // FIXME:
+                      .join("\n\n"),
                   );
                 },
               },
@@ -126,7 +125,11 @@ export default function View() {
               "Delete",
             ),
             m("hr", { class: showTransition ? "enter" : "" }),
-            m("a", { class: "menu-item" }, "Settings"),
+            m(
+              m.route.Link,
+              { class: "menu-item", href: "/settings" },
+              "Settings",
+            ),
             m("a", { class: "menu-item" }, "Help"),
           ]),
           m(
@@ -368,7 +371,6 @@ export default function View() {
                       x.type == "table"
                         ? m.trust(x.out)
                         : m("p", { class: "terminal-output " + x.type }, [
-                            // TODO: debug toggle
                             m.trust(
                               outputTypeTable[x.type] ||
                                 outputTypeTable[x.typeActual],
@@ -415,6 +417,11 @@ export default function View() {
         out: stringify(output),
         typeActual: type(output),
       });
+
+    if (localStorage.getItem("show_debug") === "false")
+      terminalOutput = terminalOutput.filter((e) => e.type !== "debug");
+    else if (localStorage.getItem("show_debug") !== "true")
+      localStorage.setItem("show_debug", true);
 
     if (terminalOutput.length == 0)
       terminalOutput.push({

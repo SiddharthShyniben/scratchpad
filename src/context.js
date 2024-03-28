@@ -28,10 +28,7 @@ export const contextMachine = () => {
 
   return [
     {
-      // TODO:
-      // - error handling? (not in scope here but)
-      // - string substitution
-      // NOTE: json-stringify-pretty-compact
+      // TODO: string substitution
       document,
       window,
 

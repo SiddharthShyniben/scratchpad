@@ -3,7 +3,7 @@ import { basicSetup, EditorView } from "codemirror";
 import { keymap } from "@codemirror/view";
 import { javascript } from "@codemirror/lang-javascript";
 import { birdsOfParadise } from "thememirror";
-import { once, selectAll } from "./util";
+import { once } from "./util";
 import { createScratchpad, updateScratchPad } from "./scratchpad";
 import { navigating, navigatingFromNew } from "./global-state";
 
@@ -33,7 +33,7 @@ export default function New() {
           birdsOfParadise,
           keymap.of([
             {
-              key: "Shift-Enter", // TODO: Shift?
+              key: "Shift-Enter",
               run() {
                 return true;
               },
@@ -55,8 +55,6 @@ export default function New() {
         ],
         parent: document.querySelector(".monaco"), // >:)
       });
-      // TODO: maintain minimum lines automatically
-      // TODO: theming
     },
 
     view() {
@@ -71,7 +69,11 @@ export default function New() {
             },
             "(.*)",
           ),
-          m("a", { class: "menu-item" }, "Settings"),
+          m(
+            m.route.Link,
+            { class: "menu-item", href: "/settings" },
+            "Settings",
+          ),
           m("a", { class: "menu-item" }, "Help"),
         ]),
         m("main", { class: "main" }, [
@@ -82,17 +84,9 @@ export default function New() {
               contenteditable: true,
               oninput(e) {
                 dehl();
+                e.redraw = false;
                 scratchpad.title = this.innerText.trim();
-                e.redraw = false;
                 savePad();
-              },
-              onkeypress(e) {
-                if (e.which == 13) e.preventDefault();
-                e.redraw = false;
-              },
-              onfocus(e) {
-                selectAll(e.target);
-                e.redraw = false;
               },
               onfocusout() {
                 if (scratchpad.id) {
