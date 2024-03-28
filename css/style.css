@@ -244,6 +244,14 @@ a {
   border-color: #ff0033;
 }
 
+.terminal-output.info {
+  border-color: #8cb4ff;
+}
+
+.terminal-output.debug {
+  border-color: lightcyan;
+}
+
 .terminal-output .type {
   margin: 0 1rem;
   font-size: 16px;
@@ -259,4 +267,32 @@ a {
 
 .type.object {
   color: rgb(226, 119, 47);
+}
+
+.type.timer {
+  color: #ace894;
+}
+
+.type.trace {
+  color: #db2763;
+}
+
+table.terminal-output,
+.terminal-output th,
+.terminal-output td {
+  border: 1px solid #aaa;
+  border-collapse: collapse;
+}
+
+table.terminal-output td {
+  padding: 0.5rem;
+}
+
+table.terminal-output tbody {
+  display: table;
+  width: 100%;
+}
+
+table.terminal-output {
+  padding: 0;
 }

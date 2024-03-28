@@ -143,3 +143,16 @@ export const slugify = (str) =>
     .replace(/[^\w\s-]/g, "")
     .replace(/[\s_-]+/g, "-")
     .replace(/^-+|-+$/g, "");
+
+export const escapeHtml = (unsafe) =>
+  unsafe
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("'", "&#039;");
+
+export const stringify = (x) => {
+  if (type(x) == "object" || type(x) == "array") return JSON.stringify(x);
+  return x + "";
+};

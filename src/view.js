@@ -3,7 +3,7 @@ import { basicSetup, EditorView } from "codemirror";
 import { keymap } from "@codemirror/view";
 import { javascript } from "@codemirror/lang-javascript";
 import { birdsOfParadise } from "thememirror";
-import { downloadFile, selectAll, slugify } from "./util";
+import { downloadFile, selectAll, slugify, stringify, type } from "./util";
 import {
   createScratchpad,
   deleteScratchPad,
@@ -12,6 +12,7 @@ import {
 } from "./scratchpad";
 import { navigating, navigatingFromNew } from "./global-state";
 import VM from "vm-browserify";
+import { contextMachine } from "./context";
 
 export default function View() {
   let scratchpad = {
@@ -25,6 +26,12 @@ export default function View() {
     number: '<span class="type number material-symbols-outlined">tag</span>',
     object:
       '<span class="type object material-symbols-outlined">data_object</span>',
+    "no-output":
+      '<span class="type number material-symbols-outlined">task</span>',
+    table: '<span class="type number material-symbols-outlined">table</span>',
+    time: '<span class="type timer material-symbols-outlined">timer</span>',
+    trace:
+      '<span class="type trace material-symbols-outlined">footprint</span>',
   };
 
   const savePad = () => {
@@ -67,22 +74,26 @@ export default function View() {
                 const script = new VM.Script(code, {
                   filename: slugify(scratchpad.title),
                 });
-                const context = VM.createContext({
-                  console: {
-                    // TODO: multiple inputs, but preserve type if only one
-                    log: (out) =>
-                      terminalOutput.push({ type: "log", out: out }),
-                    warn: (out) =>
-                      terminalOutput.push({ type: "warn", out: out }),
-                    error: (out) =>
-                      terminalOutput.push({
-                        type: "error",
-                        out: out,
-                      }),
-                  },
-                });
+
+                const [_context, getOutput] = contextMachine();
+                const context = VM.createContext(_context);
                 const output = script.runInContext(context);
-                terminalOutput.push({ type: "output", out: output });
+
+                terminalOutput.push(...getOutput());
+                if (output)
+                  terminalOutput.push({
+                    type: "output",
+                    out: stringify(output),
+                    typeActual: type(output),
+                  });
+
+                if (terminalOutput.length == 0)
+                  terminalOutput.push({
+                    type: "no-output",
+                    out: "No output",
+                    typeActual: "string",
+                  });
+
                 m.redraw();
                 return true;
               },
@@ -201,21 +212,19 @@ export default function View() {
             m.trust(scratchpad.title),
           ),
           m("div", { class: "monaco" + (showTransition ? " enter" : "") }),
-          ...(terminalOutput.length
-            ? terminalOutput.map(
-                (
-                  x, // TODO: Unescape
-                ) =>
-                  m("p", { class: "terminal-output " + x.type }, [
-                    m.trust(outputTypeTable[typeof x.out]),
-                    m.trust(
-                      JSON.stringify(x.out, null, 2)
-                        .replaceAll("\n", "<br>")
-                        .replaceAll(" ", "&nbsp;"),
-                    ),
-                  ]),
-              )
-            : [undefined]),
+          ...terminalOutput.map((x) =>
+            x.type == "table"
+              ? m.trust(x.out)
+              : m("p", { class: "terminal-output " + x.type }, [
+                  // TODO: debug toggle
+                  m.trust(
+                    outputTypeTable[x.type] || outputTypeTable[x.typeActual],
+                  ),
+                  m.trust(
+                    x.out.replaceAll("\n", "<br>").replaceAll(" ", "&nbsp;"),
+                  ),
+                ]),
+          ),
         ]),
       ];
     },
