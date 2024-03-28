@@ -1,8 +1,12 @@
 import m from "mithril";
+
 import { basicSetup, EditorView } from "codemirror";
 import { keymap } from "@codemirror/view";
 import { javascript } from "@codemirror/lang-javascript";
 import { birdsOfParadise } from "thememirror";
+
+import VM from "vm-browserify";
+
 import {
   downloadFile,
   outputTypeTable,
@@ -18,7 +22,6 @@ import {
   updateScratchPad,
 } from "./scratchpad";
 import { navigating, navigatingFromNew } from "./global-state";
-import VM from "vm-browserify";
 import { contextMachine } from "./context";
 
 export default function View() {
@@ -31,13 +34,6 @@ export default function View() {
     if (!scratchpad.id) scratchpad = createScratchpad(scratchpad);
     else scratchpad = updateScratchPad(scratchpad);
   };
-
-  /*
-   * NOTE: Note to self on running code
-   * - Should I support node.js internals?
-   * - External variables?
-   * - Or just use a VM and let the user deal with it?
-   */
 
   const showTransition = navigating();
   if (showTransition) navigating(false);
@@ -89,9 +85,7 @@ export default function View() {
                       scratchpad.title += letters.splice(0, 1);
                       m.redraw();
                       if (letters.length)
-                        setTimeout(() => {
-                          addLetters().then(resolve);
-                        }, 100);
+                        setTimeout(() => addLetters().then(resolve), 100);
                       else resolve();
                     });
                   await addLetters();
@@ -110,7 +104,11 @@ export default function View() {
                 onclick() {
                   downloadFile(
                     slugify(scratchpad.title) + ".js",
-                    scratchpad.pad[0].text, // FIXME:
+                    scratchpad.pad
+                      .map((x) =>
+                        x.type == "code" ? x.text : `/* \n${x.text}\n */`,
+                      )
+                      .join("\n\n"), // FIXME:
                   );
                 },
               },
@@ -152,15 +150,119 @@ export default function View() {
           ),
           m(
             "div",
-            scratchpad.pad.map((_, i) => {
+            scratchpad.pad.map((el, i) => {
+              if (el.type == "text") {
+                return m("div", { class: "block" }, [
+                  m("div", { class: "buttons" }, [
+                    scratchpad.pad.length > 1
+                      ? m(
+                          "button",
+                          m(
+                            "span",
+                            {
+                              class: "material-symbols-outlined danger",
+                              onclick: () => {
+                                scratchpad.pad.splice(i, 1);
+                                savePad();
+                              },
+                            },
+                            "delete",
+                          ),
+                        )
+                      : undefined,
+                    m(
+                      "button",
+                      m(
+                        "span",
+                        {
+                          class: "material-symbols-outlined",
+                          onclick: () => {
+                            scratchpad.pad.splice(i + 1, 0, {
+                              type: "text",
+                              text: "What will you write today?",
+                            });
+                            m.redraw();
+                          },
+                        },
+                        "edit_note",
+                      ),
+                    ),
+                    m(
+                      "button",
+                      {
+                        onclick: () => {
+                          scratchpad.pad.splice(i + 1, 0, {
+                            type: "code",
+                            text: "",
+                          });
+                          m.redraw();
+                          editors.forEach(({ editor, i }) => {
+                            console.log(editor.dom, scratchpad.pad[i]);
+                            const transaction = editor.state.update({
+                              changes: {
+                                from: 0,
+                                to: editor.state.doc.length,
+                                insert: scratchpad.pad[i].text,
+                              },
+                            });
+                            editor.dispatch(transaction);
+                          });
+                          savePad();
+                        },
+                      },
+                      m("span", { class: "material-symbols-outlined" }, "code"),
+                    ),
+                  ]),
+                  m(
+                    "p",
+                    {
+                      class: showTransition ? "para enter" : "para",
+                      placeholder: "empty",
+                      contenteditable: true,
+                      oninput(e) {
+                        el.text = this.innerText.trim();
+                        e.redraw = false;
+                        savePad();
+                      },
+                    },
+                    m.trust(el.text),
+                  ),
+                ]);
+              }
+
               const className = "monaco-" + i; // >:)
-              return m("div", { class: "block", key: i }, [
+              return m("div", { class: "block" }, [
                 m("div", { class: "buttons" }, [
+                  scratchpad.pad.length > 1
+                    ? m(
+                        "button",
+                        m(
+                          "span",
+                          {
+                            class: "material-symbols-outlined danger",
+                            onclick: () => {
+                              scratchpad.pad.splice(i, 1);
+                              savePad();
+                            },
+                          },
+                          "delete",
+                        ),
+                      )
+                    : undefined,
                   m(
                     "button",
                     m(
                       "span",
-                      { class: "material-symbols-outlined" },
+                      {
+                        class: "material-symbols-outlined",
+                        onclick: () => {
+                          scratchpad.pad.splice(i + 1, 0, {
+                            type: "text",
+                            text: "What will you write today?",
+                          });
+                          m.redraw();
+                        },
+                      },
                       "edit_note",
                     ),
                   ),
@@ -201,8 +303,6 @@ export default function View() {
                 ]),
                 m("div", {
                   oncreate() {
-                    // PERF: This may spawn a new editor every time a new pad is added, even for pre-existing editors.
-                    // Maybe the VDOM prevents that, but I need to verify
                     const editor = new EditorView({
                       extensions: [
                         basicSetup,

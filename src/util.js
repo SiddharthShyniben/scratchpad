@@ -1,3 +1,5 @@
+import jsonStringify from "json-stringify-pretty-compact";
+
 export function assert(condition, message) {
   if (!condition) {
     throw message || "Assertion failed";
@@ -153,7 +155,7 @@ export const escapeHtml = (unsafe) =>
     .replaceAll("'", "&#039;");
 
 export const stringify = (x) => {
-  if (type(x) == "object" || type(x) == "array") return JSON.stringify(x);
+  if (type(x) == "object" || type(x) == "array") return jsonStringify(x);
   return x + "";
 };
 

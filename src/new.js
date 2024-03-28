@@ -12,7 +12,7 @@ export default function New() {
 
   let scratchpad = {
     title: null,
-    pad: [{ type: "code", text: "\n\n\n" }],
+    pad: [{ type: "code", text: "" }],
   };
 
   let editor;
@@ -33,9 +33,8 @@ export default function New() {
           birdsOfParadise,
           keymap.of([
             {
-              key: "Ctrl-Enter", // TODO: Shift?
+              key: "Shift-Enter", // TODO: Shift?
               run() {
-                // TODO: run code
                 return true;
               },
             },
@@ -46,18 +45,18 @@ export default function New() {
               scratchpad.pad[0].text = editor.state.doc.toString();
               savePad();
               first = false;
+              if (scratchpad.id) {
+                navigating(true);
+                navigatingFromNew(true);
+                m.route.set("/pad/:id", { id: scratchpad.id }); // or not?
+              }
             }
           }),
         ],
         parent: document.querySelector(".monaco"), // >:)
       });
-
       // TODO: maintain minimum lines automatically
       // TODO: theming
-      const transaction = editor.state.update({
-        changes: { from: 0, insert: "\n\n\n\n\n" },
-      });
-      editor.dispatch(transaction);
     },
 
     view() {

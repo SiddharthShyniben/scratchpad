@@ -12,6 +12,7 @@
   "dependencies": {
     "@codemirror/lang-javascript": "^6.2.2",
     "codemirror": "^6.0.1",
+    "json-stringify-pretty-compact": "^4.0.0",
     "mithril": "^2.2.2",
     "mithril-stream": "^2.0.0",
     "nanoid": "^5.0.6",
