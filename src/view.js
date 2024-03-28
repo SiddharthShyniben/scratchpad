@@ -170,7 +170,12 @@ export default function View() {
 
                           const [_context, getOutput] = contextMachine();
                           const context = VM.createContext(_context);
-                          const output = script.runInContext(context);
+                          let output;
+                          try {
+                            output = script.runInContext(context);
+                          } catch (e) {
+                            context.console.error(e.stack);
+                          }
 
                           terminalOutput.push(...getOutput());
                           if (output)
@@ -199,7 +204,7 @@ export default function View() {
                       }
                     }),
                   ],
-                  parent: document.querySelector(className),
+                  parent: document.querySelector("." + className),
                 });
                 editors.push(editor);
               },

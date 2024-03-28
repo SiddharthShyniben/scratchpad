@@ -168,4 +168,5 @@ export const outputTypeTable = {
   table: '<span class="type number material-symbols-outlined">table</span>',
   time: '<span class="type timer material-symbols-outlined">timer</span>',
   trace: '<span class="type trace material-symbols-outlined">footprint</span>',
+  error: '<span class="type trace material-symbols-outlined">error</span>',
 };
