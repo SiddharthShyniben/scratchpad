@@ -5,6 +5,7 @@ import { getScratchpads } from "./scratchpad";
 
 import List from "./list";
 import Splash from "./splash";
+import Modal from "./modal";
 
 async function fetchData() {
   return getScratchpads();
@@ -26,6 +27,7 @@ export default function Home() {
   return {
     view() {
       return [
+        localStorage.getItem("visited") || m(Modal),
         m("aside", [
           m("a", { href: "/", class: "logo menu-item" }, "(.*)"),
           m("a", { href: "#!/new", class: "menu-item" }, "New"),

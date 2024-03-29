@@ -56,6 +56,37 @@ export default function Settings() {
             "Enable or disable showing the output of `console.debug` calls",
           ),
         ]),
+        m(
+          "a",
+          {
+            class: "run delete",
+            onclick(e) {
+              if (e.target.innerText == "Delete all my data") {
+                const replacement = "Are you really sure?";
+                let i = 1;
+
+                const replace = () => {
+                  e.target.innerText =
+                    replacement.slice(0, i) + e.target.innerText.slice(i);
+                  i++;
+                  if (i <= replacement.length) setTimeout(replace, 25);
+                };
+
+                replace();
+                setTimeout(
+                  () => (e.target.innerText = "Delete all my data"),
+                  5000,
+                );
+              } else {
+                localStorage.setItem("scratch", "");
+                localStorage.setItem("show_debug", "true");
+                navigating(true);
+                m.route.set("/home");
+              }
+            },
+          },
+          "Delete all my data",
+        ),
       ]);
     },
   };
