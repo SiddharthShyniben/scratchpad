@@ -28,7 +28,7 @@ export default function Settings() {
           ),
           m("hr"),
           m("a", { class: "menu-item", href: "#!/settings" }, "Settings"),
-          m("a", { class: "menu-item" }, "Help"),
+          // m("a", { class: "menu-item" }, "Help"),
         ]),
         m("h1", "Settings"),
         m("div", { class: "setting" }, [

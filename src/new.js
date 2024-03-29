@@ -74,7 +74,7 @@ export default function New() {
             { class: "menu-item", href: "/settings" },
             "Settings",
           ),
-          m("a", { class: "menu-item" }, "Help"),
+          // m("a", { class: "menu-item" }, "Help"),
         ]),
         m("main", { class: "main" }, [
           m(

@@ -132,7 +132,7 @@ export default function View() {
 
                     replace();
 
-                    setTimeout(() => e.target.innerText = "Delete", 5000)
+                    setTimeout(() => (e.target.innerText = "Delete"), 5000);
                   } else {
                     deleteScratchPad(scratchpad.id);
                     m.route.set("/home");
@@ -147,7 +147,7 @@ export default function View() {
               { class: "menu-item", href: "/settings" },
               "Settings",
             ),
-            m("a", { class: "menu-item" }, "Help"),
+            // m("a", { class: "menu-item" }, "Help"),
           ]),
           m(
             "h2",
@@ -160,6 +160,7 @@ export default function View() {
                 savePad();
               },
               onkeypress(e) {
+                e.redraw = false;
                 if (e.which == 13) e.preventDefault();
               },
               onfocus(e) {
@@ -240,8 +241,8 @@ export default function View() {
                       placeholder: "empty",
                       contenteditable: true,
                       oninput(e) {
-                        el.text = this.innerText.trim();
                         e.redraw = false;
+                        el.text = this.innerText.trim();
                         savePad();
                       },
                     },
