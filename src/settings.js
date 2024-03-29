@@ -34,14 +34,16 @@ export default function Settings() {
         m("div", { class: "setting" }, [
           m("input", {
             type: "checkbox",
-            oninit(vnode) {
+            oncreate(vnode) {
               if (
                 !["true", "false"].includes(localStorage.getItem("show_debug"))
               )
                 localStorage.setItem("show_debug", true);
-              vnode.attrs.checked =
-                localStorage.getItem("show_debug") == "true";
-              console.log(vnode.attrs.checked);
+              vnode.dom.setAttribute(
+                "checked",
+                localStorage.getItem("show_debug") == "true",
+              );
+              m.redraw();
             },
             oninput(e) {
               localStorage.setItem("show_debug", e.target.checked.toString());
