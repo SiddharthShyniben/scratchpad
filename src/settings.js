@@ -1,5 +1,5 @@
 import m from "mithril";
-import { navigating, navigatingFromNew } from "./global-state";
+import { navigating } from "./global-state";
 
 export default function Settings() {
   // Debug log
